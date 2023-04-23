@@ -25,7 +25,6 @@ struct UberMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
-        print("DEBUG: Map State is \(mapState)")
         
         switch mapState {
             case .noInput:
@@ -61,9 +60,11 @@ extension UberMapViewRepresentable {
         
         func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
             userLocationCoordinate = userLocation.coordinate
-            let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-            parent.mapView.setRegion(region, animated: true)
-            currentRegion = region
+            if parent.mapState != .locationSelected {
+                let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+                parent.mapView.setRegion(region, animated: true)
+                currentRegion = region
+            }
         }
         
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
@@ -77,6 +78,7 @@ extension UberMapViewRepresentable {
         
         func addAndSelectAnnotation(with coordinate: CLLocationCoordinate2D){
             parent.mapView.removeAnnotations(parent.mapView.annotations)
+           // parent.mapView.removeOverlays(parent.mapView.overlays)
             
             let anno = MKPointAnnotation()
             anno.coordinate = coordinate
@@ -86,6 +88,7 @@ extension UberMapViewRepresentable {
         }
         
         func configurePolyline(with coordinate: CLLocationCoordinate2D){
+            
             guard let userLocationCoordinate = self.userLocationCoordinate else { return }
             getDestinationRoute(from: userLocationCoordinate, to: coordinate) { [weak self] route in
                 guard let self = self else { return }
@@ -114,7 +117,8 @@ extension UberMapViewRepresentable {
         
         func clearMapViewAndRecenterOnUserLocation(){
             parent.mapView.removeAnnotations(parent.mapView.annotations)
-            parent.mapView.removeOverlays(parent.mapView.overlays)
+            let overlays = parent.mapView.overlays
+            parent.mapView.removeOverlays(overlays)
             if let currentRegion = currentRegion {
                 parent.mapView.setRegion(currentRegion, animated: true)
             }

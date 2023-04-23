@@ -30,6 +30,7 @@ class LocationSearchViewModel: NSObject, ObservableObject {
     //MARK: - Helpers
     
     func selectLocation(_ localSearch: MKLocalSearchCompletion){
+        selectedLocationCoordinate = nil
         locationSearch(for: localSearch) { [weak self] response, error in
             guard let self = self else { return }
             if let error = error {
