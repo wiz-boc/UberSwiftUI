@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct RideRequestView: View {
+    @State private var selectedRideType: RideType = .uberX
+    
     var body: some View {
         VStack{
             Capsule()
@@ -73,15 +75,15 @@ struct RideRequestView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             ScrollView(.horizontal){
                 HStack(spacing: 12) {
-                    ForEach(0 ..< 3, id: \.self){ _ in
+                    ForEach(RideType.allCases){ type in
                         VStack(alignment: .leading) {
-                            Image("sedan")
+                            Image(type.imageName)
                                 .resizable()
                                 .scaledToFit()
                                 .padding()
                             
-                            VStack(spacing: 4){
-                                Text("UberX")
+                            VStack(alignment: .leading,spacing: 4){
+                                Text(type.description)
                                     .font(.system(size: 14, weight: .semibold))
                                 
                                 Text("$22.04")
@@ -90,8 +92,15 @@ struct RideRequestView: View {
                             .padding(8)
                         }
                         .frame(width: 112, height: 140)
-                        .background(Color(.systemGroupedBackground))
+                        .foregroundColor(type == selectedRideType ? .white : .black)
+                        .background(Color(type == selectedRideType ? .systemBlue : .systemGroupedBackground))
+                        .scaleEffect(type == selectedRideType ? 1.15 : 1.0)
                         .cornerRadius(10)
+                        .onTapGesture {
+                            withAnimation(.spring()){
+                                selectedRideType = type
+                            }
+                        }
                     }
                 }
             }
